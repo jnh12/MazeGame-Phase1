@@ -1,5 +1,7 @@
 #include <iostream>
 #include <vector>
+#include <cstdlib> 
+#include <ctime>
 
 using std::vector;
 using std::pair;
@@ -15,6 +17,8 @@ public:
     vector<vector<int>> arr; // used instead of 2d array since it is easier and is dynamic
 
     MazeGenerator(int r, int c){
+        rows = r;
+        cols = c;
         arr.assign(rows, vector<int>(cols, BLOCKED)); //fills array with blocked
     }
 
