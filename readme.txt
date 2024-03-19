@@ -23,3 +23,5 @@ Checkpoint 1:
 
 
 hala2 the meothods like find frontier or add frontier to list or pick random value w hek we will do them kil wahad la7al then we can combine our work
+
+first push
