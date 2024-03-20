@@ -30,12 +30,15 @@ public:
     }
 
     vector<pair<int, int>> computeFrontierCells(pair<int, int> cell) {
-        pair<int, int> top = {arr[cell.first - 2], arr[cell.second]};
-        pair<int, int> right = {arr[cell.first], arr[cell.second + 2]};
-        pair<int, int> bottom = {arr[cell.first + 2], arr[cell.second]};
-        pair<int, int> left = {arr[cell.first], arr[cell.second - 2]};
-        vector<pair<int,int>> frontiers;
+        pair<int, int> top = {cell.first  - 2, cell.second};
+        pair<int, int> right = {cell.first, cell.second +2};
+        pair<int, int> bottom ={cell.first + 2, cell.second};
+        pair<int, int> left= { cell.first, cell.second-2};
 
+        vector<pair<int,int>> frontiers; //list of forntiers found
+
+
+        //CONDTIONS TO CHECK FOR If TGHE FRONTIERS EXIST WITHIN BOUNDS OF ARR, AND TO CHECK THAT FRONTIER IS NOT PASSAGE
         if (top.first >= 0 && arr[top.first][top.second] == BLOCKED) {
             frontiers.push_back(top);
         }
