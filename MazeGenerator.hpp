@@ -29,7 +29,7 @@ public:
         return {randomRow, randomCol};
     }
 
-    vector<pair<int, int>> computeFrontierCells(pair<int, int> cell) {
+    vector<pair<int, int>>computeFrontierCells(pair<int, int> cell) {
         pair<int, int> top = {cell.first  - 2, cell.second};
         pair<int, int> right = {cell.first, cell.second +2};
         pair<int, int> bottom ={cell.first + 2, cell.second};
@@ -58,9 +58,58 @@ public:
         return frontiers;
     } // implement finding of frontier cells. Cell inputted as pair and then return an array that contains frontier cells
 
+    vector<pair<int,int>> getNeighbours(pair<int,int> current){
+        vector<pair<int, int>> neighbors;
+        if (current.first - 2 >= 0 && arr[current.first - 2][current.second] == PASSAGE)
+            neighbors.push_back({current.first - 2, current.second});
+        if (current.second + 2 < cols && arr[current.first][current.second + 2] == PASSAGE)
+            neighbors.push_back({current.first, current.second + 2});
+        if (current.first + 2 < rows && arr[current.first + 2][current.second] == PASSAGE)
+            neighbors.push_back({current.first + 2, current.second});
+        if (current.second - 2 >= 0 && arr[current.first][current.second - 2] == PASSAGE)
+            neighbors.push_back({current.first, current.second - 2});
+        return neighbors;
+    }
+
     void generateMaze() {
+
+        pair<int,int> randomPick = pickRandomCell();
+        arr[randomPick.first][randomPick.second] = PASSAGE;
+
+        vector<pair<int,int>> frontierList= computeFrontierCells(randomPick);
+
+        while(!frontierList.empty()){
+            int frontierPick = rand() % frontierList.size();
+            pair<int, int> current = frontierList[frontierPick];
+            frontierList.erase(frontierList.begin() + frontierPick);
+
+            vector<pair<int,int>> neighbourCells = getNeighbours(current);
+
+
+            if (!neighbourCells.empty()) {
+                int randomPickNeighbour = rand() % neighbourCells.size();
+                pair<int, int> randomNeighbor = neighbourCells[randomPickNeighbour]; //pick ranadom neighbour
+
+                arr[(current.first + randomNeighbor.first) / 2][(current.second + randomNeighbor.second) / 2] = PASSAGE;  // i just averagedthe value of neighbor and current to find middle cell
+
+                arr[randomNeighbor.first][randomNeighbor.second] = PASSAGE;
+
+                vector<pair<int, int>> newfrontierList = computeFrontierCells(randomNeighbor);
+
+                for (const auto& frontierCell : newfrontierList) {
+                    frontierList.push_back(frontierCell);
+                } // add the new frontier values to the old list
+            }
+
+
+        }
+        
+
+
+
+
         /*
-         * generate maze array
+         * 
          * pick random cell as starting point
          * make starting point passage
          * generate frontier cells for starting point and add to list of frontier cells
@@ -76,5 +125,16 @@ public:
 
     }
 
-    void displayMaze(); //just for loop the original 2d array
+    void displayMaze() {
+        for (int i = 0; i < rows; ++i) {
+            for (int j = 0; j < cols; ++j) {
+                if (arr[i][j] == BLOCKED) {
+                    std::cout << " % ";
+                } else {
+                    std::cout << "  "; 
+                }
+            }
+            std::cout << "\n";
+        }
+    } //just for loop the original 2d array
 };
