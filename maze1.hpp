@@ -1,11 +1,15 @@
 #include <iostream>
 #include <vector>
-#include <cstdlib>
+#include <cstdlib> 
 #include <ctime>
+#include <cmath>
+#include <algorithm>
+#include <queue>
 
 using std::vector;
 using std::pair;
-using std::count;
+using std::priority_queue;
+using std::abs;
 
 class maze {
 public:
@@ -166,11 +170,49 @@ public:
     } // just for loop the original 2d array
 
 
-
+    int heuristic(pair<int, int> a, pair<int, int> b) {
+        return abs(a.first - b.first) + abs(a.second - b.second);
+    }
 
 
     void navigateMaze() {
 
+        priority_queue<pair<int, Cell*>> pq;
+        vector<vector<bool>> visited(rows, vector<bool>(cols, false));
+
+        Cell* startCell = new Cell(starting.first, starting.second);
+        startCell->cost = heuristic(startCell->position, ending);
+        pq.push({-startCell->cost, startCell});
+
+        while (!pq.empty()) {
+            Cell* currentCell = pq.top().second;
+            pq.pop();
+
+            if (currentCell->position == ending) {
+                std::cout << "Found the end cell!" << std::endl;
+                break;
+            }
+
+            visited[currentCell->position.first][currentCell->position.second] = true;
+
+            vector<pair<int, int>> neighbors = getNeighbours(currentCell->position);
+
+            for (const auto& neighborPos : neighbors) {
+                if (!visited[neighborPos.first][neighborPos.second]) {
+                    Cell* neighbor = new Cell(neighborPos.first, neighborPos.second);
+                    neighbor->parent = currentCell;
+                    neighbor->cost = currentCell->cost + 10 + heuristic(neighbor->position, ending);
+                    pq.push({-neighbor->cost, neighbor});
+                    visited[neighborPos.first][neighborPos.second] = true;
+                }
+            }
+        }
+
+        // Cleanup memory
+        while (!pq.empty()) {
+            delete pq.top().second;
+            pq.pop();
+        }
         /* we use manhattan distance before start and end node (since we can't move diagonally)
         d = abs(x1 - x0) + abs(y1 - y0)
 
