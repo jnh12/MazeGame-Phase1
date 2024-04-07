@@ -1,11 +1,16 @@
 #include <iostream>
-#include "maze1.hpp"
+#include "Maze.hpp"
+#include "MazeGenerator.hpp"
+#include "MazeNavigator.hpp"
 
 int main() {
-    maze genMaze(30, 50);
+    MazeNavigator genMaze (30,50);
+
 
     genMaze.generateMaze();
     genMaze.displayMaze();
+
+    
     genMaze.navigateMaze();
     return 0;
 }
