@@ -19,6 +19,7 @@ public:
 
     int BLOCKED = 0;
     int PASSAGE = 1;
+    int SHORTESTPATH = 100; //used for navigation
 
 
     vector<vector<int>> arr; // used instead of 2d array since it is easier and is dynamic
@@ -93,7 +94,7 @@ public:
         return neighbors;
     }
 
-    void generateMaze() {
+    vector<vector<int>> generateMaze() {
         srand(time(0));
         int randomRow = rand() % rows;
         int randomCol = rand() % cols;
@@ -129,6 +130,7 @@ public:
             }
 
             ending = current; //when while terminates, we are left with the last cell of the maze
+            return arr;
         }
 
         std::cout << rows << "x" << cols << " Maze Generated \n\n";
@@ -146,9 +148,13 @@ public:
                 else if (ending.first == i && ending.second == j) { // Finish cell
                     std::cout << "OO";
                 }
+
+
                 else {
                     if (arr[i][j] == BLOCKED) {
                         std::cout << "##";
+                    } else if (arr[i][j] == SHORTESTPATH){    //used for navigating shortest path
+                    std::cout << "--";
                     } else {
                         std::cout << "  ";
                     }

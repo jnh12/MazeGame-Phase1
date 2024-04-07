@@ -6,6 +6,6 @@ int main() {
 
     genMaze.generateMaze();
     genMaze.displayMaze();
-
+    genMaze.navigateMaze();
     return 0;
 }
