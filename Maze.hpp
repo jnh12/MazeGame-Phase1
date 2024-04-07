@@ -11,8 +11,9 @@ using std::pair;
 using std::priority_queue;
 using std::abs;
 
-class Maze {
-public:
+class maze {
+
+    public:
 
     int rows;
     int cols;
@@ -27,16 +28,247 @@ public:
     pair<int, int> starting {0,0};
     pair<int, int> ending {rows-1,cols-1}; //initialize start and end cells of the maze before our random search for the start cell
 
-    
-    Maze() {
-        rows = 0;
-        cols = 0;
-        arr.assign(rows, vector<int>(cols, BLOCKED)); //fills array with blocked
+
+    maze::maze(int r, int c) {
+    rows = r;
+    cols = c;
+    arr.assign(rows, vector<int>(cols, BLOCKED)); //fills array with blocked
     }
 
-    Maze(int r, int c) {
-        rows = r;
-        cols = c;
-        arr.assign(rows, vector<int>(cols, BLOCKED)); //fills array with blocked
+
+        class Cell {   //nested class needed for navigating maze
+                    public:
+                        Cell* parent;
+                        int cost;
+                        pair<int, int> position;
+
+                        Cell(int x, int y): position({x,y}){}
+        };
+
+
+
+    pair<int, int> pickRandomCell() { // locates random cell in array (if u want to use pair output use .first/.second)
+        srand(time(0));
+        int randomRow = rand() % rows;
+        int randomCol = rand() % cols;
+
+        starting = {randomRow, randomCol};
+        return {randomRow, randomCol};
     }
+
+    vector<pair<int, int>>computeFrontierCells(pair<int, int> cell) {
+        pair<int, int> top = {cell.first  - 2, cell.second};
+        pair<int, int> right = {cell.first, cell.second + 2};
+        pair<int, int> bottom = {cell.first + 2, cell.second};
+        pair<int, int> left = { cell.first, cell.second - 2};
+
+        vector<pair<int,int>> frontiers; // list of frontiers found
+
+        int cnt = 0; // to avoid dpulicate frontier cells
+
+        // CONDITIONS TO CHECK FOR If THE FRONTIERS EXIST WITHIN BOUNDS OF ARR, AND TO CHECK THAT FRONTIER IS NOT PASSAGE
+        if (top.first >= 0 && arr[top.first][top.second] == BLOCKED) {
+            cnt = count(frontierList.begin(), frontierList.end(), top);
+            if (!cnt) frontiers.push_back(top);
+        }
+
+        if (right.second < cols && arr[right.first][right.second] == BLOCKED){
+            cnt = count(frontierList.begin(), frontierList.end(), right);
+            if (!cnt) frontiers.push_back(right);
+        }
+
+        if (bottom.first < rows && arr[bottom.first][bottom.second] == BLOCKED){
+            cnt = count(frontierList.begin(), frontierList.end(), bottom);
+            if (!cnt) frontiers.push_back(bottom);
+        }
+
+        if (left.second >= 0 && arr[left.first][left.second] == BLOCKED){
+            cnt = count(frontierList.begin(), frontierList.end(), left);
+            if (!cnt) frontiers.push_back(left);
+        }
+
+        return frontiers;
+    } // finding all possible frontier cells of cell inputted as pair and then return an array that contains frontier cells
+
+    vector<pair<int,int>> getNeighbours(pair<int,int> current) {
+        vector<pair<int, int>> neighbors;
+
+        if (current.first - 2 >= 0 && arr[current.first - 2][current.second] == PASSAGE)
+            neighbors.push_back({current.first - 2, current.second});
+
+        if (current.second + 2 < cols && arr[current.first][current.second + 2] == PASSAGE)
+            neighbors.push_back({current.first, current.second + 2});
+
+        if (current.first + 2 < rows && arr[current.first + 2][current.second] == PASSAGE)
+            neighbors.push_back({current.first + 2, current.second});
+
+        if (current.second - 2 >= 0 && arr[current.first][current.second - 2] == PASSAGE)
+            neighbors.push_back({current.first, current.second - 2});
+
+        return neighbors;
+    }
+
+    vector<vector<int>> generateMaze() {
+        srand(time(0));
+        int randomRow = rand() % rows;
+        int randomCol = rand() % cols;
+
+        starting = {randomRow, randomCol};
+        arr[starting.first][starting.second] = PASSAGE;
+
+        frontierList = computeFrontierCells(starting);
+
+        while(!frontierList.empty()){
+            int frontierPick = rand() % frontierList.size();
+            pair<int, int> current = frontierList[frontierPick];
+            frontierList.erase(frontierList.begin() + frontierPick);
+
+            arr[current.first][current.second] = PASSAGE;//
+
+            vector<pair<int,int>> neighbourCells = getNeighbours(current);
+
+            if (!neighbourCells.empty()) {
+                int randomPickNeighbour = rand() % neighbourCells.size();
+                pair<int, int> randomNeighbor = neighbourCells[randomPickNeighbour]; // pick random neighbour
+                pair<int, int> nearNeighbor = {(current.first + randomNeighbor.first) / 2, (current.second + randomNeighbor.second) / 2}; // i just averaged the value of neighbor and current to find middle cell
+
+                arr[nearNeighbor.first][nearNeighbor.second] = PASSAGE;
+                arr[randomNeighbor.first][randomNeighbor.second] = PASSAGE;
+
+                vector<pair<int, int>> newFrontierList = computeFrontierCells(current);
+
+                // add the new frontier values to the old list
+                for (const auto& frontierCell : newFrontierList) {
+                    frontierList.push_back(frontierCell);
+                }
+            }
+
+            ending = current; //when while terminates, we are left with the last cell of the maze
+            return arr;
+        }
+
+        std::cout << rows << "x" << cols << " Maze Generated \n\n";
+    }
+
+    void displayMaze() {
+        std::cout << "Start (XX):\t" << starting.first << " - " << starting.second << "\n";
+        std::cout << "Finish (OO):\t" << ending.first << " - " << ending.second << "\n\n";
+
+        for (int i = 0; i < rows; ++i) {
+            for (int j = 0; j < cols; ++j) {
+                if (starting.first == i && starting.second == j) { // Start cell
+                    std::cout << "XX";
+                }
+                else if (ending.first == i && ending.second == j) { // Finish cell
+                    std::cout << "OO";
+                }
+
+
+                else {
+                    if (arr[i][j] == BLOCKED) {
+                        std::cout << "##";
+                    } else if (arr[i][j] == SHORTESTPATH){    //used for navigating shortest path
+                    std::cout << "--";
+                    } else {
+                        std::cout << "  ";
+                    }
+                }
+            }
+
+                std::cout << "\n";
+            }
+
+            std::cout << "\n\n";
+        } // just for loop the original 2d array
+
+
+
+        int heuristic(pair<int, int> a, pair<int, int> b) {
+            return abs(a.first - b.first) + abs(a.second - b.second);
+            // we use manhattan distance before start and end node (since we can't move diagonally)
+        }
+
+        void displayMaze2(const std::vector<std::vector<int>>& maze, const std::vector<std::pair<int, int>>& path) {
+        for (int i = 0; i < maze.size(); ++i) {
+            for (int j = 0; j < maze[i].size(); ++j) {
+                if (maze[i][j] == 8) {
+                    std::cout << "P "; // P represents the path cell
+                } else {
+                    std::cout << maze[i][j] << " ";
+                }
+            }
+            std::cout << std::endl;
+            }
+        }
+
+
+        void navigateMaze() {
+            priority_queue<pair<int, Cell*>> toVISIT;
+            vector<vector<bool>> visited(rows, vector<bool>(cols, false));
+            vector<pair<Cell*, Cell*>> parents;
+
+            Cell* startCell = new Cell(starting.first, starting.second);
+            startCell->cost = heuristic(startCell->position, ending); // starting cell has actual cost 0
+
+            int g = 0; // Initialize g
+
+            toVISIT.push({startCell->cost, startCell}); // add starting cell to the priority queue
+            std::vector<pair<int, int>> path; // array containing positions of each node on the shortest path from start to end goal
+
+            path.push_back(startCell->position); // add first cell to path (first node is mandatorily visited in the shortest path)
+
+            while (!toVISIT.empty()) {
+                Cell* currentCell = toVISIT.top().second;
+                toVISIT.pop();
+
+                g += 10;
+                currentCell->cost = g + heuristic(currentCell->position, ending);
+
+                if (currentCell->position == ending) {
+                    std::cout << "Found the end cell!" << std::endl;
+
+
+                    for (int i = path.size() - 1; i >= 0; i--) { //loop for displaying the path in reverse order (since path has nodes from goal going back to starting cell)
+                        std::cout << "Shortest path is: " << path[i].first << "-" << path[i].second << std::endl;
+                    }
+
+                    // Clean up memory
+                    while (!toVISIT.empty()) {
+                        delete toVISIT.top().second;
+                        toVISIT.pop();
+                    }
+
+                    return;
+                }
+
+
+                visited[currentCell->position.first][currentCell->position.second] = true;
+
+                vector<pair<int, int>> neighbors = getNeighbours(currentCell->position);
+
+                for (const auto& neighborPos : neighbors) {
+                    Cell* neighbor = new Cell(neighborPos.first, neighborPos.second);
+
+                    if (!visited[neighborPos.first][neighborPos.second]) {
+                        neighbor->parent = currentCell;
+                        neighbor->cost = g + heuristic(neighbor->position, ending);
+
+                        if (neighbor->cost < neighbor->parent->cost) {
+                            toVISIT.push({neighbor->cost, neighbor});
+                            path.push_back(neighbor->position); // Update path with neighbor position
+                        }
+                        visited[neighborPos.first][neighborPos.second] = true;
+                        }
+                    }
+                }
+
+                displayMaze2(arr, path); // display maze again, this time with the shortest path
+
+                if (path.size() == 1) { // if the path array contains only the start cell
+                    path = {}; // empty the path since no path was found
+                }
+
+                std::cout << "Path does not exist" << "\n";
+        }
+
 };
