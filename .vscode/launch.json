@@ -8,8 +8,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": true,
-      "cwd": "c:/Users/Jad/Desktop/ /MazeRepo/MazeGame-Phase1",
-      "program": "c:/Users/Jad/Desktop/ /MazeRepo/MazeGame-Phase1/build/Debug/outDebug",
+      "cwd": "c:/Users/user/Desktop/project 270",
+      "program": "c:/Users/user/Desktop/project 270/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [
