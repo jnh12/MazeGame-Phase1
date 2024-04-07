@@ -11,7 +11,7 @@ using std::pair;
 using std::priority_queue;
 using std::abs;
 
-class maze {
+class Maze {
 
     public:
 
@@ -29,10 +29,10 @@ class maze {
     pair<int, int> ending {rows-1,cols-1}; //initialize start and end cells of the maze before our random search for the start cell
 
 
-    maze::maze(int r, int c) {
-    rows = r;
-    cols = c;
-    arr.assign(rows, vector<int>(cols, BLOCKED)); //fills array with blocked
+    Maze(int r, int c) {
+        rows = r;
+        cols = c;
+        arr.assign(rows, vector<int>(cols, BLOCKED)); //fills array with blocked
     }
 
 
@@ -162,13 +162,11 @@ class maze {
                 else if (ending.first == i && ending.second == j) { // Finish cell
                     std::cout << "OO";
                 }
-
-
                 else {
                     if (arr[i][j] == BLOCKED) {
                         std::cout << "##";
-                    } else if (arr[i][j] == SHORTESTPATH){    //used for navigating shortest path
-                    std::cout << "--";
+                    } else if (arr[i][j] == 8) {
+                    std::cout << "P "; // P represents the path cell
                     } else {
                         std::cout << "  ";
                     }
@@ -186,19 +184,6 @@ class maze {
         int heuristic(pair<int, int> a, pair<int, int> b) {
             return abs(a.first - b.first) + abs(a.second - b.second);
             // we use manhattan distance before start and end node (since we can't move diagonally)
-        }
-
-        void displayMaze2(const std::vector<std::vector<int>>& maze, const std::vector<std::pair<int, int>>& path) {
-        for (int i = 0; i < maze.size(); ++i) {
-            for (int j = 0; j < maze[i].size(); ++j) {
-                if (maze[i][j] == 8) {
-                    std::cout << "P "; // P represents the path cell
-                } else {
-                    std::cout << maze[i][j] << " ";
-                }
-            }
-            std::cout << std::endl;
-            }
         }
 
 
@@ -256,13 +241,15 @@ class maze {
                         if (neighbor->cost < neighbor->parent->cost) {
                             toVISIT.push({neighbor->cost, neighbor});
                             path.push_back(neighbor->position); // Update path with neighbor position
+                            arr[neighbor->position.first][neighbor->position.second] = SHORTESTPATH;
                         }
+
                         visited[neighborPos.first][neighborPos.second] = true;
                         }
                     }
                 }
 
-                displayMaze2(arr, path); // display maze again, this time with the shortest path
+                displayMaze(); // display maze again, this time with the shortest path
 
                 if (path.size() == 1) { // if the path array contains only the start cell
                     path = {}; // empty the path since no path was found
