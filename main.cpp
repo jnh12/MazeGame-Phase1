@@ -1,6 +1,11 @@
 #include <iostream>
+#include "maze1.hpp"
 
 int main() {
-    std::cout << "Hello, VSCode runner is working!" << std::endl;
+    maze genMaze(30, 50);
+
+    genMaze.generateMaze();
+    genMaze.displayMaze();
+
     return 0;
 }
