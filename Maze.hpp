@@ -106,25 +106,6 @@ public:
         return neighbors;
     }
 
-    vector<pair<int,int>> getNavNeighbours(pair<int,int> current) {
-        vector<pair<int, int>> neighbors;
-
-        if (current.first - 1 >= 0 && arr[current.first - 1][current.second] == PASSAGE)
-            neighbors.push_back({current.first - 1, current.second});
-
-        if (current.second + 1 < cols && arr[current.first][current.second + 1] == PASSAGE)
-            neighbors.push_back({current.first, current.second + 1});
-
-        if (current.first + 1 < rows && arr[current.first + 1][current.second] == PASSAGE)
-            neighbors.push_back({current.first + 1, current.second});
-
-        if (current.second - 1 >= 0 && arr[current.first][current.second - 1] == PASSAGE)
-            neighbors.push_back({current.first, current.second - 1});
-
-        return neighbors;
-    }
-
-
     void generateMaze() {
         srand(time(0));
         int randomRow = rand() % rows;
@@ -206,11 +187,16 @@ public:
         Cell* startCell = new Cell(starting.first, starting.second);
         startCell->cost = heuristic(startCell->position, ending); //starting cell has actual cost 0
 
-        int g = 0;
+        int g;
         toVISIT.push({startCell->cost, startCell}); //add starting cell to the priority queue
         std::vector<pair<int,int>> path; //array containing positions of each node on the shortest path from start to end goal
 
         path.push_back(startCell->position); //add first cell to path (first node is mandatorily visited in the shortest path)
+
+
+        // for (int i = 0; i < rows; ++i) {
+        //     for (int j = 0; j < cols; ++j) {
+
 
         while (!toVISIT.empty()) {
             Cell* currentCell = toVISIT.top().second;
@@ -221,21 +207,27 @@ public:
 
             if (currentCell->position == ending) {
                 std::cout << "Found the end cell!" << std::endl;
-
                 //so path will only contain start node which is also the end node
                 path.push_back(currentCell->position);
 
                 for (int i=path.size()-1; i>=0 ; i++){
                     std::cout << "Shortest path is: " << path[i].first << "-" << path[i].second << std::endl;
+
                 }
                 return;
             }
 
+
             visited[currentCell->position.first][currentCell->position.second] = true;
-            vector<pair<int, int>> neighbors = getNavNeighbours(currentCell->position);
+
+            vector<pair<int, int>> neighbors = getNeighbours(currentCell->position);
+
+
 
             for (const auto& neighborPos : neighbors) {
+
                 Cell* neighbor = new Cell(neighborPos.first, neighborPos.second);
+                //f = actual cost, which is 10 per step(node) + heuristic
 
                 if (!visited[neighborPos.first][neighborPos.second]) {
                     neighbor->parent = currentCell;
@@ -245,14 +237,19 @@ public:
                         // neighbor->cost = currentCell->cost + 10 + heuristic(neighbor->position, ending);
                         toVISIT.push({neighbor->cost, neighbor});
                         path.push_back(currentCell->position);
-                        arr[neighbor->position.first][neighbor->position.second]= SHORTESTPATH;
+
+                        generateMaze();
+                        vector<vector<int>> arr2 = arr;
+                        arr2[neighbor->position.first][neighbor->position.second]= SHORTESTPATH;
                     }
                     visited[neighborPos.first][neighborPos.second] = true;
+
+
                 }
             }
-        }
 
-        //displayMaze();   //display maze again, this time with the shortest path
+        }
+        displayMaze();   //display maze again, this time with the shortest path
 
         if (path.size() == 1){    //if the path array contains only the start cell
             path = {}; //empty the path. since no path was found
@@ -260,6 +257,4 @@ public:
 
         std::cout << "Path does not exist" << "\n";
     }
-//
-
 };
