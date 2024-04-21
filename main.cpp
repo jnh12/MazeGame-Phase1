@@ -1,16 +1,29 @@
 #include <iostream>
-#include "Maze.hpp"
+#include "maze-sfml.hpp"
+
+using std::cout;
+using std::cin;
 
 int main() {
-    Maze genMaze(50, 50);
 
-    genMaze.generateMaze();
-    genMaze.displayMaze();
+    int r, c, s; // Temp variables for rows cols and speed
 
-    std::cout << "\n\n\n";
+    cout << "Enter Width [Min 10 - Default 50]: ";
+    cin >> c;
 
-    genMaze.navigateMaze();
-    genMaze.displayMaze();
+    cout << "Enter Height [Min 10 - Default 50]: ";
+    cin >> r;
+
+    cout << "Enter Speed [Fastest 1 - Slowest 10 - Default 5]: ";
+    cin >> s;
+
+    cout << std::endl << "Press ENTER to solve the maze" << std::endl;
+    cout << std::endl << "Press BACKSPACE to generate a new maze" << std::endl;
+    cout << "Press ESC to close" << std::endl;
+
+
+    Visualizer v(r, c, s);
 
     return 0;
 }
+

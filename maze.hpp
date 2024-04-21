@@ -5,6 +5,7 @@
 #include <cmath>
 #include <algorithm>
 #include <queue>
+#include <unistd.h>
 
 using std::vector;
 using std::pair;
@@ -20,22 +21,17 @@ public:
 
     int BLOCKED = 0;
     int PASSAGE = 1;
+    int START = 10;
+    int FINISH = 20;
     int SHORTESTPATH = 100; //used for navigation
 
     vector<vector<int>> arr; // used instead of 2d array since it is easier and is dynamic
+    vector<pair<int, int>> path; // array containing positions of each node on the shortest path from start to end goal
+
+
     vector<pair<int,int>> frontierList;
     pair<int, int> starting {0,0};
     pair<int, int> ending {rows-1,cols-1}; //initialize start and end cells of the maze before our random search for the start cell
-
-    class Cell {   //nested class needed for navigating maze
-    public:
-        Cell* parent;
-        int cost;
-        pair<int, int> position;
-
-        Cell(int x, int y): position({x,y}){}   //not sure if we need more contructing statements. we'll see as we write the code
-    };
-
 
     Maze() {
         rows = 0;
@@ -119,13 +115,22 @@ public:
         return neighbors;
     }
 
+    void resetMaze() {
+        arr.assign(rows, vector<int>(cols, BLOCKED)); //fills array with blocked
+        path.clear();
+        frontierList.clear();
+    }
 
     void generateMaze() {
+
+        resetMaze();
+
         srand(time(0));
-        int randomRow = (2 * rand()) % rows;
-        int randomCol = (2 * rand()) % cols;
+        int randomRow = rand() % rows;
+        int randomCol = rand() % cols;
 
         starting = {randomRow, randomCol};
+        //starting = {1, 1};
         arr[starting.first][starting.second] = PASSAGE;
 
         frontierList = computeFrontierCells(starting);
@@ -158,7 +163,7 @@ public:
             ending = current; //when while terminates, we are left with the last cell of the maze
         }
 
-        std::cout << rows << "x" << cols << " Maze Generated \n\n";
+        //std::cout << "\n" << rows << " x " << cols << " Maze Generated \n\n";
     }
 
     void displayMaze() {
@@ -210,7 +215,6 @@ public:
 
         vector<vector<bool>> visited(rows, vector<bool>(cols, false));
         vector<vector<pair<int, int>>> parentMatrix(rows, vector<pair<int, int>>(cols, {-1, -1})); // Parent matrix for each cell
-        vector<pair<int,int>> path; // array containing positions of each node on the shortest path from start to end goal
 
         auto compareCells = [&](pair<int, int> a, pair<int, int> b) {
             return calculateCost(a, ending) > calculateCost(b, ending);
@@ -227,7 +231,7 @@ public:
             toVISIT.pop();
 
             if (currentCell == ending) {
-                std::cout << "Found the end cell!" << std::endl;
+                //std::cout << "Found the end cell!" << std::endl;
 
                 // start building the path backwards
                 pair<int, int> temp = currentCell;
@@ -260,10 +264,11 @@ public:
             }
         }
 
+
         for (const auto& p : path) {
             arr[p.first][p.second] = SHORTESTPATH;
         }
-
+        arr[starting.first][starting.second] = START;
+        arr[ending.first][ending.second] = FINISH;
     }
-
 };
